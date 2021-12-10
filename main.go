@@ -7,9 +7,10 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"runtime"
+	"strconv"
 
+	"github.com/ccoverstreet/jablkodev"
 	"github.com/gorilla/mux"
 )
 
@@ -20,23 +21,20 @@ type Config struct {
 func main() {
 	log.Println("Jarmuz-Message starting...")
 
-	JablkoCorePort := os.Getenv("JABLKO_CORE_PORT")
-	JMODPort := os.Getenv("JABLKO_MOD_PORT")
-	JMODKey := os.Getenv("JABLKO_MOD_KEY")
-	JMODConfig := os.Getenv("JABLKO_MOD_CONFIG")
-
-	if JablkoCorePort == "" {
+	// Load environment variables
+	err := jablkodev.LoadJablkoEnv()
+	if err != nil {
 		panic("Jablko environment variables aren't set. Make sure to run this as a JMOD or set up a fake environment")
 	}
 
-	log.Println(JablkoCorePort, JMODPort, JMODKey)
-
 	var conf Config
 
-	if len(JMODConfig) < 4 {
+	confStr := jablkodev.GetJablkoModConfig()
+
+	if len(confStr) < 4 {
 		conf = Config{"PLACEHOLDER"}
 	} else {
-		err := json.Unmarshal([]byte(JMODConfig), &conf)
+		err := json.Unmarshal([]byte(confStr), &conf)
 		if err != nil {
 			log.Println("ERROR: Unable to unmarshal config", err)
 			panic(err)
@@ -50,7 +48,7 @@ func main() {
 	router.HandleFunc("/instanceData", handleInstanceData)
 	router.HandleFunc("/jmod/sendMessage", wrapHandle(handleSendMessage, context))
 
-	http.ListenAndServe("127.0.0.1:"+JMODPort, router)
+	http.ListenAndServe("127.0.0.1:"+strconv.Itoa(jablkodev.GetJablkoModPort()), router)
 }
 
 func ParseJSONBody(body io.ReadCloser, dest interface{}) error {

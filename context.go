@@ -3,8 +3,8 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
-	"net/http"
+
+	"github.com/ccoverstreet/jablkodev"
 )
 
 type AppContext struct {
@@ -17,36 +17,20 @@ func CreateAppContext(conf Config) *AppContext {
 
 func createSendFunc(botID string) func(string) error {
 	return func(message string) error {
-		type bodyFormat struct {
+		body := struct {
 			BotID string `json:"bot_id"`
 			Text  string `json:"text"`
-		}
-
-		body := bodyFormat{botID, message}
+		}{botID, message}
 
 		jsonBytes, err := json.Marshal(body)
 		if err != nil {
 			return err
 		}
 
-		req, err := http.NewRequest("POST", "https://api.groupme.com/v3/bots/post", bytes.NewBuffer(jsonBytes))
-		if err != nil {
-			return err
-		}
+		_, err = jablkodev.PostSimple("https://api.groupme.com/v3/bots/post",
+			"application/json",
+			bytes.NewBuffer(jsonBytes))
 
-		req.Header.Set("Content-Type", "application/json")
-
-		client := &http.Client{}
-		res, err := client.Do(req)
-		if err != nil {
-			return err
-		}
-		defer res.Body.Close()
-
-		if res.StatusCode < 200 || res.StatusCode >= 400 {
-			return fmt.Errorf("Status code %d from GroupMe", res.StatusCode)
-		}
-
-		return nil
+		return err
 	}
 }
