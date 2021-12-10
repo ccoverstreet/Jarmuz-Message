@@ -1,4 +1,6 @@
 github.com/ccoverstreet/jablkodev v0.0.0-20211210174340-e446bfca7bc8 h1:A8vBMAEnv/9GCwH2jOCVmL8uDwyIE5jBB96+IRQ6juo=
 github.com/ccoverstreet/jablkodev v0.0.0-20211210174340-e446bfca7bc8/go.mod h1:hfrpK07+FgkqByGSKVqhl5gPMp23Yi2ahoXG2e8SxhI=
+github.com/ccoverstreet/jablkodev v0.1.0 h1:2H4C3idr8+2/6BJToIzOU+O56BoVTkBwC6i/N8DzCBw=
+github.com/ccoverstreet/jablkodev v0.1.0/go.mod h1:hfrpK07+FgkqByGSKVqhl5gPMp23Yi2ahoXG2e8SxhI=
 github.com/gorilla/mux v1.8.0 h1:i40aqfkR1h2SlN9hojwV5ZA91wcXFOvkdNIeFDP5koI=
 github.com/gorilla/mux v1.8.0/go.mod h1:DVbg23sWSpFRCP0SfiEN6jmj59UnW/n46BH5rLB71So=
