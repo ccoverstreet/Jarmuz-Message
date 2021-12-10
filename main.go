@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"runtime"
 
 	"github.com/gorilla/mux"
 )
@@ -23,6 +24,10 @@ func main() {
 	JMODPort := os.Getenv("JABLKO_MOD_PORT")
 	JMODKey := os.Getenv("JABLKO_MOD_KEY")
 	JMODConfig := os.Getenv("JABLKO_MOD_CONFIG")
+
+	if JablkoCorePort == "" {
+		panic("Jablko environment variables aren't set. Make sure to run this as a JMOD or set up a fake environment")
+	}
 
 	log.Println(JablkoCorePort, JMODPort, JMODKey)
 
@@ -62,6 +67,12 @@ func wrapHandle(handle func(*AppContext, http.ResponseWriter, *http.Request), ct
 	}
 }
 
+func httpErrorHandler(err error, msg string, w http.ResponseWriter) {
+	_, filename, line, _ := runtime.Caller(1)
+	log.Printf("ERROR: %s: %d\n\t%v\n\t%s", filename, line, err, msg)
+	fmt.Fprintf(w, `{"err": "%s"}`, msg)
+}
+
 func handleWebComponent(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "class{}")
 }
@@ -76,8 +87,17 @@ func handleSendMessage(ctx *AppContext, w http.ResponseWriter, r *http.Request) 
 	}
 
 	err := ParseJSONBody(r.Body, &data)
-	log.Println(data)
-	log.Println(err)
+	if err != nil {
+		httpErrorHandler(err, "Unable to parse JSON body", w)
+		return
+	}
 
-	ctx.SendMessage(data.Message)
+	err = ctx.SendMessage(data.Message)
+	if err != nil {
+		httpErrorHandler(err, "Unable to send GroupMe message", w)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, `{"status": "successful"}`)
 }

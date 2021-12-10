@@ -40,7 +40,10 @@ func createSendFunc(botID string) func(string) error {
 			return err
 		}
 
-		fmt.Println(res.Status)
+		if res.StatusCode < 200 || res.StatusCode >= 400 {
+			return fmt.Errorf("Status code %d from GroupMe", res.StatusCode)
+		}
+
 		return nil
 	}
 }
